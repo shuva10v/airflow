@@ -28,7 +28,7 @@ from airflow import settings
 from airflow.api.common.experimental.trigger_dag import trigger_dag
 from airflow.models import DagBag, DagRun, Pool, TaskInstance
 from airflow.settings import Session
-from airflow.utils.timezone import datetime, utcnow
+from airflow.utils.timezone import datetime, utcnow, parse as parse_datetime
 from airflow.www import app as application
 
 
@@ -134,7 +134,7 @@ class TestApiExperimental(TestBase):
         response = json.loads(response.data.decode('utf-8'))
         dagbag = DagBag()
         dag = dagbag.get_dag('example_bash_operator')
-        dag_run = dag.get_dagrun(response['execution_date'])
+        dag_run = dag.get_dagrun(parse_datetime(response['execution_date']))
         self.assertEqual(run_id, dag_run.run_id)
 
         response = self.client.post(
@@ -161,6 +161,7 @@ class TestApiExperimental(TestBase):
             content_type="application/json"
         )
         self.assertEqual(200, response.status_code)
+        self.assertEqual(datetime_string, json.loads(response.data.decode('utf-8'))['execution_date'])
 
         dagbag = DagBag()
         dag = dagbag.get_dag(dag_id)
