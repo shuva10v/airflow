@@ -125,7 +125,7 @@ class TestApiExperimental(TestBase):
         run_id = 'my_run' + utcnow().isoformat()
         response = self.client.post(
             url_template.format('example_bash_operator'),
-            data=json.dumps({'run_id': run_id),
+            data=json.dumps({'run_id': run_id}),
             content_type="application/json"
         )
 
