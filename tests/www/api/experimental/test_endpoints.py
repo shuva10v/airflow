@@ -122,13 +122,20 @@ class TestApiExperimental(TestBase):
 
     def test_trigger_dag(self):
         url_template = '/api/experimental/dags/{}/dag_runs'
+        run_id = 'my_run' + utcnow().isoformat()
         response = self.client.post(
             url_template.format('example_bash_operator'),
-            data=json.dumps({'run_id': 'my_run' + utcnow().isoformat()}),
+            data=json.dumps({'run_id': run_id),
             content_type="application/json"
         )
 
         self.assertEqual(200, response.status_code)
+        # Check execution_date is correct
+        response = json.loads(response.data.decode('utf-8'))
+	    dagbag = DagBag()
+        dag = dagbag.get_dag('example_bash_operator')
+        dag_run = dag.get_dagrun(response['execution_date'])
+        self.assertEqual(run_id, dag_run.run_id)
 
         response = self.client.post(
             url_template.format('does_not_exist_dag'),
